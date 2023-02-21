@@ -6,14 +6,19 @@ channel_id_vdud = 'UCMCgOm8GZkHp8zJ6l7_hIuA'
 channel_id_edition = 'UC1eFXmJNkjITxPFWTy6RsWg'
 
 # Создание экземпляра класса
-channel = Channel()
-# Добавление объекта API, изменяем
-channel.add_object_youtube()
+channel = Channel(channel_id_edition)
 
-# Читаем и выводим инфо
-channel.read_info(channel_id_vdud)
-channel.print_info()
+# Вывод содержимого переменных экземпляра
+print(channel.channel_id)
+print(channel.channel_name)
+print(channel.channel_description)
+print(channel.channel_link)
+print(channel.number_of_subscriber)
+print(channel.number_of_video)
+print(channel.number_of_views)
 
-# Читаем и выводим инфо
-channel.read_info(channel_id_edition)
-channel.print_info()
+# Объект для работы с API
+print(channel.get_object_youtube())
+
+# Создает фаил json
+channel.to_json()
