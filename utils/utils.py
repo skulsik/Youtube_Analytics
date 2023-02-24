@@ -18,7 +18,7 @@ class InitAPIYouTube:
         self.youtube_object = build('youtube', 'v3', developerKey=api_key)
 
 
-    def get_object_youtube(self):
+    def get_object_youtube(self) -> object:
         """
         :return: Возвращает объект с youtube API
         """
@@ -26,7 +26,7 @@ class InitAPIYouTube:
 
 
 class Channel(InitAPIYouTube):
-    def __init__(self, channel_id):
+    def __init__(self, channel_id: str):
         """
         Инициализация атрибутов, считывание инфо о канале
         :param channel_id: id канала
@@ -38,17 +38,30 @@ class Channel(InitAPIYouTube):
         self.channel = self.get_object_youtube().channels().list(id=channel_id, part='snippet,statistics').execute()
 
         # Инициализация переменных
+        # Id канала
         self.__channel_id = channel_id
+
+        # Имя канала
         self.channel_name = self.channel["items"][0]["snippet"]["title"]
+
+        # Описание канала
         self.channel_description = self.channel["items"][0]["snippet"]["description"]
+
+        # Ссылка на канал
         self.channel_link = self.channel["items"][0]["snippet"]["thumbnails"]["default"]["url"]
+
+        # Количество подписчиков
         self.number_of_subscriber = self.channel["items"][0]["statistics"]["subscriberCount"]
+
+        # Количество видео
         self.number_of_video = self.channel["items"][0]["statistics"]["videoCount"]
+
+        # Количество просмотров
         self.number_of_views = self.channel["items"][0]["statistics"]["viewCount"]
 
 
     @property
-    def channel_id(self):
+    def channel_id(self) -> str:
         """
         Доступ к переменной
         :return:
@@ -73,3 +86,34 @@ class Channel(InitAPIYouTube):
         path = f"json\{self.channel_name}.json"
         with open(path, "w") as file:
             json.dump(self.print_info(), file)
+
+
+    def __str__(self) -> str:
+        """
+        :return: Возврат название канала
+        """
+        return f"YouTube канал: {self.channel_name}"
+
+
+    def __gt__(self, other) -> bool:
+        """
+        :param other: Другой экземпляр
+        :return: Возврат результата сравнения
+        """
+        return self.number_of_subscriber > other.number_of_subscriber
+
+
+    def __lt__(self, other) -> bool:
+        """
+        :param other: Другой экземпляр
+        :return: Возврат результата сравнения
+        """
+        return self.number_of_subscriber < other.number_of_subscriber
+
+
+    def __add__(self, other) -> int:
+        """
+        :param other: Другой экземпляр
+        :return: Возврат сцммы количенства подписчиков двух экземпляров
+        """
+        return self.number_of_subscriber + other.number_of_subscriber
