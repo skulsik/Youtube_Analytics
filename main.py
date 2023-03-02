@@ -2,8 +2,8 @@ from utils.utils import *
 
 
 # Объявление id каналов
-channel_id_vdud = 'UCMCgOm8GZkHp8zJ6l7_hIuA'
-channel_id_edition = 'UC1eFXmJNkjITxPFWTy6RsWg'
+# channel_id_vdud = 'UCMCgOm8GZkHp8zJ6l7_hIuA'
+# channel_id_edition = 'UC1eFXmJNkjITxPFWTy6RsWg'
 
 # ТЗ-1-2
 # Создание экземпляра класса
@@ -27,18 +27,24 @@ channel_id_edition = 'UC1eFXmJNkjITxPFWTy6RsWg'
 
 # ТЗ-3
 # Создание экземпляров
-ch1 = Channel(channel_id_edition)
-ch2 = Channel(channel_id_vdud)
+#ch1 = Channel(channel_id_edition)
+#ch2 = Channel(channel_id_vdud)
 
 # Вывод названия каналов
-print(ch1)
-print(ch2)
+#print(ch1)
+#print(ch2)
 
 # Сравнение каналов ch1 > ch2
-print(ch1 > ch2)
+#print(ch1 > ch2)
 
 # Сравнение каналов ch1 < ch2
-print(ch1 < ch2)
+#print(ch1 < ch2)
 
 # Сложение подписчиков каналов
-print(ch1 + ch2)
+#print(ch1 + ch2)
+
+#ТЗ-4
+video1 = Video('9lO06Zxhu88')
+video2 = PLVideo('BBotskuyw_M', 'PL7Ntiz7eTKwrqmApjln9u4ItzhDLRtPuD')
+print(video1)
+print(video2)
