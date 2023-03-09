@@ -1,5 +1,7 @@
 import os
 import json
+import isodate
+import datetime
 from googleapiclient.discovery import build
 
 
@@ -8,7 +10,7 @@ class InitAPIYouTube:
     name_of_the_environment_variable = 'API_You_Tube_KEY'
 
 
-    def add_object_youtube(self, name_key: str = name_of_the_environment_variable):
+    def __init__(self, name_key: str = name_of_the_environment_variable):
         """
         Создает и возвращает объект для работы с API
         :param name_key: Либо получаем имя ключа, либо присваиваем по умолчанию из переменной
@@ -37,7 +39,7 @@ class Channel(InitAPIYouTube):
         :param channel_id: id канала
         """
         # Создает и возвращает объект для работы с API
-        self.add_object_youtube()
+        super().__init__()
 
         # Читаем инфо по id в список
         self.channel = self.get_object_youtube().channels().list(id=channel_id, part='snippet,statistics').execute()
@@ -124,14 +126,14 @@ class Channel(InitAPIYouTube):
         return self.number_of_subscriber + other.number_of_subscriber
 
 
-class Video(Channel):
+class Video(InitAPIYouTube):
     def __init__(self, video_id: str = None):
         """
         Считывает с YouTube информацию о видео. Инициализирует переменные.
         :param video_id: Id видео
         """
         # Создает и возвращает объект для работы с API
-        self.add_object_youtube()
+        super().__init__()
 
         # Читаем инфо по id в список
         self.video = self.get_object_youtube().videos().list(id=video_id, part='snippet,contentDetails,statistics').execute()
@@ -174,3 +176,85 @@ class PLVideo(Video):
         :return: Возврат название видео и название плайлиста
         """
         return f"Название видео: {self.video_name}. Название плайлиста: {self.playlist_name}."
+
+
+class PlayList(InitAPIYouTube):
+    def __init__(self, playlist_id: str):
+        """Инициализация переменных"""
+        super().__init__()
+        # Читаем инфо по id в список
+        self.playlist = self.get_object_youtube().playlists().list(id=playlist_id, part='contentDetails,snippet').execute()
+        self.playlist_id = playlist_id
+
+        # Название плайлиста
+        self.__name_play_list = self.playlist["items"][0]["snippet"]["title"]
+
+        # URL плайлиста
+        self.__url_of_play_list = f'https://www.youtube.com/playlist?list={playlist_id}'
+
+
+    @property
+    def name_play_list(self) -> str:
+        """Вывод названия плайлиста"""
+        print(self.__name_play_list)
+
+
+    @property
+    def url_of_play_list(self):
+        """Вывод url плайлиста"""
+        print(self.__url_of_play_list)
+
+
+    @property
+    def summ_time_of_play_list(self) -> object:
+        """
+        Складывает продолжительность всех видео
+        :return: объект datatime, общая продолжительность всех видео в плэйлисте
+        """
+        # Читаем инфо по id в список
+        playlist: dict = self.get_object_youtube().playlistItems().list(playlistId=self.playlist_id, part='contentDetails').execute()
+
+        # Создает список id видео из плайлиста
+        self.video_ids: list[str] = [video['contentDetails']['videoId'] for video in playlist['items']]
+
+        # Создает список из видео и инфо о них
+        video_response: list = self.get_object_youtube().videos().list(part='contentDetails,statistics', id=','.join(self.video_ids)).execute()
+
+        # Задаем объект datetime
+        self.summ_duration: object = datetime.timedelta()
+
+        for video in video_response['items']:
+            # Длительности YouTube-видео представлены в ISO 8601 формате
+            iso_8601_duration: str = video['contentDetails']['duration']
+
+            # Str -> date, преобразует строку в формат дата
+            duration: object = isodate.parse_duration(iso_8601_duration)
+
+            # Сумма длительности всех видео
+            self.summ_duration += duration
+        return self.summ_duration
+
+
+    def show_best_video(self):
+        """ Поиск видео с максимальным количеством лайков и вывод его url"""
+        max_likes: int = 0
+        # Читаем инфо по id в список
+        for video_id in self.video_ids:
+            # Читает инфо о видео
+            video: dict = self.get_object_youtube().videos().list(id=video_id, part='snippet,contentDetails,statistics').execute()
+
+            # Количество лайков данного видео
+            likes: int = int(video['items'][0]['statistics']['likeCount'])
+
+            # Ищет максимально количество лайков, присваивает url (с максимальным кол-м лайков) в переменную
+            if likes > max_likes:
+                max_likes = likes
+                url_of_max_likes: str = f'https://youtu.be/{video_id}'
+        print(url_of_max_likes)
+
+
+    def __str__(self) -> str:
+        """
+        :return: Возврат название плайлиста
+        """
+        return f"Название плайлиста: {self.playlist_name}."
