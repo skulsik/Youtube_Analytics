@@ -51,14 +51,19 @@ from utils.utils import *
 
 
 # ТЗ-5
-pl = PlayList('PLguYHBi01DWr4bRWc4uaguASmo7lW4GCb')
+# pl = PlayList('PLguYHBi01DWr4bRWc4uaguASmo7lW4GCb')
+#
+# pl.name_play_list
+# pl.url_of_play_list
+#
+# duration = pl.summ_time_of_play_list
+# print(duration)
+# print(type(duration))
+# print(duration.total_seconds())
+#
+# pl.show_best_video()
 
-pl.name_play_list
-pl.url_of_play_list
-
-duration = pl.summ_time_of_play_list
-print(duration)
-print(type(duration))
-print(duration.total_seconds())
-
-pl.show_best_video()
+# ТЗ-6
+broken_video = Video('broken_video_id')
+print(broken_video.video_name)
+print(broken_video.number_of_likes)

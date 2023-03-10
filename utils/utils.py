@@ -41,21 +41,21 @@ class Channel(InitAPIYouTube):
         # Создает и возвращает объект для работы с API
         super().__init__()
 
-        # Читаем инфо по id в список
-        self.channel = self.get_object_youtube().channels().list(id=channel_id, part='snippet,statistics').execute()
+        # Читаем инфо по id в словарь
+        self.channel: dict = self.get_object_youtube().channels().list(id=channel_id, part='snippet,statistics').execute()
 
         # Инициализация переменных
         # Id канала
-        self.__channel_id = channel_id
+        self.__channel_id: str = channel_id
 
         # Имя канала
-        self.channel_name = self.channel["items"][0]["snippet"]["title"]
+        self.channel_name: str = self.channel["items"][0]["snippet"]["title"]
 
         # Описание канала
-        self.channel_description = self.channel["items"][0]["snippet"]["description"]
+        self.channel_description: str = self.channel["items"][0]["snippet"]["description"]
 
         # Ссылка на канал
-        self.channel_link = self.channel["items"][0]["snippet"]["thumbnails"]["default"]["url"]
+        self.channel_link: str = self.channel["items"][0]["snippet"]["thumbnails"]["default"]["url"]
 
         # Количество подписчиков
         self.number_of_subscriber = self.channel["items"][0]["statistics"]["subscriberCount"]
@@ -132,21 +132,34 @@ class Video(InitAPIYouTube):
         Считывает с YouTube информацию о видео. Инициализирует переменные.
         :param video_id: Id видео
         """
+        # Инициализация переменных
+        # Хранение ошибки для передачи в тесты
+        self.Error_YouTube: object = None
+
+        # Название видео
+        self.video_name: str = None
+
+        # Количество просмотров
+        self.number_of_views: str = None
+
+        # Количество лайков
+        self.number_of_likes: str = None
+
         # Создает и возвращает объект для работы с API
         super().__init__()
 
-        # Читаем инфо по id в список
-        self.video = self.get_object_youtube().videos().list(id=video_id, part='snippet,contentDetails,statistics').execute()
+        try:
+            # Читаем инфо по id в список
+            self.video: dict = self.get_object_youtube().videos().list(id=video_id, part='snippet,contentDetails,statistics').execute()
 
-        # Инициализация переменных
-        # Название видео
-        self.video_name = self.video["items"][0]["snippet"]["title"]
-
-        # Количество просмотров
-        self.number_of_views = self.video["items"][0]["statistics"]["viewCount"]
-
-        # Количество лайков
-        self.number_of_likes = self.video["items"][0]["statistics"]["likeCount"]
+            if self.video['items']:
+                self.video_name = self.video["items"][0]["snippet"]["title"]
+                self.number_of_views = self.video["items"][0]["statistics"]["viewCount"]
+                self.number_of_likes = self.video["items"][0]["statistics"]["likeCount"]
+            else:
+                raise VideoIdError('VideoIdError: Проверьте правильность введеного Id')
+        except VideoIdError as e:
+            self.Error_YouTube = e
 
 
     def __str__(self) -> str:
@@ -157,7 +170,7 @@ class Video(InitAPIYouTube):
 
 
 class PLVideo(Video):
-    def __init__(self, video_id, playlist_id):
+    def __init__(self, video_id: str, playlist_id: str):
         """
         Считывает с YouTube информацию о плайлисте. Инициализирует переменную playlist_name
         :param playlist_id: Id видео
@@ -165,10 +178,10 @@ class PLVideo(Video):
         super().__init__(video_id)
 
         # Читаем инфо по id в список
-        self.playlist = self.get_object_youtube().playlists().list(id=playlist_id, part='snippet').execute()
+        self.playlist: dict = self.get_object_youtube().playlists().list(id=playlist_id, part='snippet').execute()
 
         # Название плайлиста
-        self.playlist_name = self.playlist["items"][0]["snippet"]["title"]
+        self.playlist_name: str = self.playlist["items"][0]["snippet"]["title"]
 
 
     def __str__(self) -> str:
@@ -184,25 +197,27 @@ class PlayList(InitAPIYouTube):
         super().__init__()
         # Читаем инфо по id в список
         self.playlist = self.get_object_youtube().playlists().list(id=playlist_id, part='contentDetails,snippet').execute()
-        self.playlist_id = playlist_id
+        self.playlist_id: str = playlist_id
 
         # Название плайлиста
-        self.__name_play_list = self.playlist["items"][0]["snippet"]["title"]
+        self.__name_play_list: str = self.playlist["items"][0]["snippet"]["title"]
 
         # URL плайлиста
-        self.__url_of_play_list = f'https://www.youtube.com/playlist?list={playlist_id}'
+        self.__url_of_play_list: str = f'https://www.youtube.com/playlist?list={playlist_id}'
 
 
     @property
     def name_play_list(self) -> str:
         """Вывод названия плайлиста"""
         print(self.__name_play_list)
+        return self.__name_play_list
 
 
     @property
-    def url_of_play_list(self):
+    def url_of_play_list(self) -> str:
         """Вывод url плайлиста"""
         print(self.__url_of_play_list)
+        return self.__url_of_play_list
 
 
     @property
@@ -251,6 +266,7 @@ class PlayList(InitAPIYouTube):
                 max_likes = likes
                 url_of_max_likes: str = f'https://youtu.be/{video_id}'
         print(url_of_max_likes)
+        return url_of_max_likes
 
 
     def __str__(self) -> str:
@@ -258,3 +274,13 @@ class PlayList(InitAPIYouTube):
         :return: Возврат название плайлиста
         """
         return f"Название плайлиста: {self.playlist_name}."
+
+
+class VideoIdError(Exception):
+    def __init__(self, *args, **kwarg):
+        self.message = args[0] if args else 'VideoIdError: Неизвестная ошибка Id'
+        print(self.message)
+
+
+    def __str__(self):
+        return self.message
